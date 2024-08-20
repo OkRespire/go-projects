@@ -18,7 +18,6 @@
 # vendor/
 
 #removes folders i use to test individual things
-/HelloWorld/
 
 # Go workspace file
 go.work
