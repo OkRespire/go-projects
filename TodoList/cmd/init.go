@@ -80,7 +80,7 @@ func InitialiseToDo(dir string) *os.File {
 	var csvFile *os.File
 	if _, err := os.Stat("list.csv"); err != nil {
 		if os.IsNotExist(err) {
-			csvFile, err := os.Create(filepath.Join(dir, "list.csv"))
+			csvFile, err := os.Create(filepath.Join(dir+"/", "list.csv"))
 			if err != nil {
 				log.Fatal("Failed to create file", err)
 				return nil
