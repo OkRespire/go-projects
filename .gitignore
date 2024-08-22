@@ -18,7 +18,7 @@
 # vendor/
 
 #removes folders i use to test individual things
-/HelloWorld/
+/HelloWorld
 # Go workspace file
 go.work
 go.work.sum

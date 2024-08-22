@@ -1,7 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 func main() {
-	fmt.Println("Hello World")
+	thing, err := os.UserConfigDir()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(thing)
 }

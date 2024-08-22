@@ -4,6 +4,8 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"bufio"
+	"encoding/csv"
 	"fmt"
 	"log"
 	"os"
@@ -33,9 +35,14 @@ const DETECTED_OS = runtime.GOOS
 func init() {
 	rootCmd.AddCommand(initCmd)
 
-	dir := getDefaultDirectoryPath()
+	dir, fileNamePath := getDefaultDirectoryPath()
 	createDirectoryIfNotExists(dir)
-	InitialiseToDo(dir)
+	InitialiseToDo(dir, fileNamePath)
+	csvFile, err := os.OpenFile(filepath.Join(dir, fileNamePath), os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatal("cannot open file.")
+	}
+	WriteToCSV(csvFile)
 
 	// Here you will define your flags and configuration settings.
 
@@ -48,19 +55,23 @@ func init() {
 	// initCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func getDefaultDirectoryPath() string {
+func getDefaultDirectoryPath() (string, string) {
 	var dir string
+	var fileNamePath string
 
 	switch DETECTED_OS {
 	case "windows":
-		dir = os.ExpandEnv("%LOCALAPPDATA%\\Respire-ToDo\\")
+		dir = os.ExpandEnv("%APPDATA%\\Respire-ToDo\\")
+		fileNamePath = "\\list.csv"
 	case "linux":
 		dir = os.ExpandEnv("$HOME/.config/Respire-ToDo/")
+		fileNamePath = "/list.csv"
 	case "darwin":
 		dir = os.ExpandEnv("$HOME/.config/Respire-ToDo/")
+		fileNamePath = "/list.csv"
 	}
 
-	return dir
+	return dir, fileNamePath
 }
 
 func createDirectoryIfNotExists(dir string) {
@@ -76,19 +87,35 @@ func createDirectoryIfNotExists(dir string) {
 	}
 }
 
-func InitialiseToDo(dir string) *os.File {
+func InitialiseToDo(dir string, fileNamePath string) {
 	var csvFile *os.File
-	if _, err := os.Stat("list.csv"); err != nil {
+	if _, err := os.Stat(filepath.Join(dir, fileNamePath)); err != nil {
 		if os.IsNotExist(err) {
-			csvFile, err := os.Create(filepath.Join(dir+"/", "list.csv"))
+			csvFile, err := os.Create(filepath.Join(dir, fileNamePath))
 			if err != nil {
 				log.Fatal("Failed to create file", err)
-				return nil
 			}
 			csvFile.Close()
 			fmt.Println("File created")
 		}
+		defer csvFile.Close()
+	}
+}
+
+func WriteToCSV(csvFile *os.File) error {
+	csvWriter := csv.NewWriter(bufio.NewWriter(csvFile))
+	record := []string{"ID", "Task", "Created", "Done"}
+
+	err := csvWriter.Write(record)
+	if err != nil {
+		fmt.Println("failed to write in csv file", err)
+		return err
 	}
 
-	return csvFile
+	csvWriter.Flush()
+	if err := csvWriter.Error(); err != nil {
+		log.Fatal("failed to flush file", err)
+	}
+	fmt.Println("wrote in csv file")
+	return nil
 }
