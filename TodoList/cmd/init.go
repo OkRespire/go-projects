@@ -27,6 +27,14 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("init called")
+		dir, fileNamePath := getDefaultDirectoryPath()
+		createDirectoryIfNotExists(dir)
+		InitialiseToDo(dir, fileNamePath)
+		csvFile, err := os.OpenFile(filepath.Join(dir, fileNamePath), os.O_WRONLY, 0644)
+		if err != nil {
+			log.Fatal("cannot open file.")
+		}
+		WriteToCSV(csvFile)
 	},
 }
 
@@ -34,15 +42,6 @@ const DETECTED_OS = runtime.GOOS
 
 func init() {
 	rootCmd.AddCommand(initCmd)
-
-	dir, fileNamePath := getDefaultDirectoryPath()
-	createDirectoryIfNotExists(dir)
-	InitialiseToDo(dir, fileNamePath)
-	csvFile, err := os.OpenFile(filepath.Join(dir, fileNamePath), os.O_WRONLY, 0644)
-	if err != nil {
-		log.Fatal("cannot open file.")
-	}
-	WriteToCSV(csvFile)
 
 	// Here you will define your flags and configuration settings.
 
