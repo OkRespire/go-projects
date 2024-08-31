@@ -4,17 +4,18 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"bufio"
 	"encoding/csv"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
 )
-
-var id int = 0
 
 // addCmd represents the add command
 var addCmd = &cobra.Command{
@@ -31,28 +32,74 @@ to quickly create a Cobra application.`,
 		fmt.Println("add called")
 
 		fmt.Println("description is: ", description)
-		dir, fileName := getDefaultDirectoryPath()
+		dir, fileName, idDir := getDefaultDirectoryPath()
 
 		fileDirPath := filepath.Join(dir, fileName)
 
-		file, err := os.Open(fileDirPath)
+		file, err := os.OpenFile(fileDirPath, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 		if err != nil {
 			fmt.Println("Error while opening the file")
 		}
 
+		// TODO: MAKE THE IDFILE AND FILEID INTO ONE SINGLE VARIABLE
+		fileId, err := os.OpenFile(filepath.Join(dir, idDir), os.O_RDONLY, 0444)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		idFile, err := os.OpenFile(filepath.Join(dir, idDir), os.O_RDWR, 0666)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		s := bufio.NewScanner(fileId)
+
+		var id string
+		for s.Scan() {
+			id = s.Text()
+		}
+		fmt.Println(id)
+		idInt, err := strconv.Atoi(id)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		idInt++
+		fmt.Println(idInt)
+		id = strconv.Itoa(idInt)
+
+		f, err := idFile.Write([]byte(id))
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("\n%d bytes written\n", f)
+
+		defer fileId.Close()
+		defer idFile.Close()
 		csvWriter := OpenCSVWriter(file)
 
-		finalString := "\n" + strconv.Itoa(id) + "," + description + ","
+		finalString := id + "," + description + ","
 
 		currentTime := time.Now()
 
 		finalString += currentTime.Format(time.DateTime) + "," + "FALSE"
 
-		fmt.Println(finalString)
-		csvWriter.Write([]string{finalString})
+		finalStringArr := strings.Split(finalString, ",")
+
+		for _, a := range finalStringArr {
+			fmt.Println(a)
+		}
+		err = csvWriter.Write(finalStringArr)
+		if err != nil {
+			fmt.Println("failed to write in csv file", err)
+		}
+		fmt.Println("Written to file at", fileDirPath)
 		csvWriter.Flush()
-		id++
-		file.Close()
+		if err := csvWriter.Error(); err != nil {
+			fmt.Println("failed to flush file", err)
+		}
+
+		defer file.Close()
 	},
 }
 
@@ -68,6 +115,7 @@ func init() {
 	// addCmd.PersistentFlags().StringVarP("description", "", "Allows you to specify what task you want to add")
 
 	addCmd.Flags().StringVarP(&description, "description", "d", "", "Allows you to specify what task you want to add")
+	addCmd.MarkFlagRequired("description")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
@@ -75,6 +123,6 @@ func init() {
 }
 
 func OpenCSVWriter(file *os.File) *csv.Writer {
-	writer := csv.NewWriter(file)
+	writer := csv.NewWriter(bufio.NewWriter(file)) // Create a new CSV writer using the provided file)
 	return writer
 }

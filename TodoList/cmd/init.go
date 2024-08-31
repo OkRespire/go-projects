@@ -27,9 +27,10 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("init called")
-		dir, fileNamePath := getDefaultDirectoryPath()
+		dir, fileNamePath, id := getDefaultDirectoryPath()
 		createDirectoryIfNotExists(dir)
 		InitialiseToDo(dir, fileNamePath)
+		InitialiseID(id, dir)
 		csvFile, err := os.OpenFile(filepath.Join(dir, fileNamePath), os.O_WRONLY, 0644)
 		if err != nil {
 			log.Fatal("cannot open file.")
@@ -54,23 +55,27 @@ func init() {
 	// initCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func getDefaultDirectoryPath() (string, string) {
+func getDefaultDirectoryPath() (string, string, string) {
 	var dir string
 	var fileNamePath string
+	var id string
 
 	switch DETECTED_OS {
 	case "windows":
 		dir = os.ExpandEnv("%APPDATA%\\Respire-ToDo\\")
 		fileNamePath = "\\list.csv"
+		id = "\\id.txt"
 	case "linux":
 		dir = os.ExpandEnv("$HOME/.config/Respire-ToDo/")
 		fileNamePath = "/list.csv"
+		id = "/id.txt"
 	case "darwin":
 		dir = os.ExpandEnv("$HOME/.config/Respire-ToDo/")
 		fileNamePath = "/list.csv"
+		id = "/id.txt"
 	}
 
-	return dir, fileNamePath
+	return dir, fileNamePath, id
 }
 
 func createDirectoryIfNotExists(dir string) {
@@ -117,4 +122,21 @@ func WriteToCSV(csvFile *os.File) error {
 	}
 	fmt.Println("wrote in csv file")
 	return nil
+}
+
+func InitialiseID(id string, dir string) {
+	if _, err := os.Stat(filepath.Join(dir, id)); err != nil {
+		if os.IsNotExist(err) {
+			idFile, err := os.Create(filepath.Join(dir, id))
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println("File created")
+			f, err := idFile.WriteString("0")
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println("Successfully wrote in id file.\nThis took", f, "bytes")
+		}
+	}
 }
