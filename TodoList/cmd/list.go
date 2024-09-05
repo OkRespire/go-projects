@@ -47,6 +47,7 @@ to quickly create a Cobra application.`,
 
 		count := 0
 		var tStr string
+		// TODO: MAKE SURE THE TIME IS READABLE!
 		for _, record := range records {
 			if count != 0 {
 				t, err := time.Parse("2006-01-02 15:04:05", record[2])
