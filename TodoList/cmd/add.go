@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -32,7 +33,9 @@ to quickly create a Cobra application.`,
 		fmt.Println("add called")
 
 		fmt.Println("description is: ", description)
-		dir, fileName, idDir := getDefaultDirectoryPath()
+		dir, fileName := getDefaultDirectoryPath()
+
+		idDir := idDir()
 
 		fileDirPath := filepath.Join(dir, fileName)
 
@@ -125,4 +128,17 @@ func init() {
 func OpenCSVWriter(file *os.File) *csv.Writer {
 	writer := csv.NewWriter(bufio.NewWriter(file)) // Create a new CSV writer using the provided file)
 	return writer
+}
+
+func idDir() string {
+	var id string
+	switch runtime.GOOS {
+	case "windows":
+		id = "\\id.txt"
+	case "linux":
+		id = "/id.txt"
+	case "darwin":
+		id = "/id.txt"
+	}
+	return id
 }

@@ -27,7 +27,8 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("init called")
-		dir, fileNamePath, id := getDefaultDirectoryPath()
+		dir, fileNamePath := getDefaultDirectoryPath()
+		id := idDir()
 		createDirectoryIfNotExists(dir)
 		InitialiseToDo(dir, fileNamePath)
 		InitialiseID(id, dir)
@@ -55,27 +56,23 @@ func init() {
 	// initCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func getDefaultDirectoryPath() (string, string, string) {
+func getDefaultDirectoryPath() (string, string) {
 	var dir string
 	var fileNamePath string
-	var id string
 
 	switch DETECTED_OS {
 	case "windows":
 		dir = os.ExpandEnv("%APPDATA%\\Respire-ToDo\\")
 		fileNamePath = "\\list.csv"
-		id = "\\id.txt"
 	case "linux":
 		dir = os.ExpandEnv("$HOME/.config/Respire-ToDo/")
 		fileNamePath = "/list.csv"
-		id = "/id.txt"
 	case "darwin":
 		dir = os.ExpandEnv("$HOME/.config/Respire-ToDo/")
 		fileNamePath = "/list.csv"
-		id = "/id.txt"
 	}
 
-	return dir, fileNamePath, id
+	return dir, fileNamePath
 }
 
 func createDirectoryIfNotExists(dir string) {
