@@ -20,6 +20,7 @@ import (
 
 // addCmd represents the add command
 var addCmd = &cobra.Command{
+	Args:  cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 	Use:   "add",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
@@ -27,12 +28,12 @@ and usage of using your command. For example:
 
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+to qickly create a Cobra application.`,
 
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("add called")
 
-		fmt.Println("description is: ", description)
+		fmt.Println("description is: ", args[0])
 		dir, fileName := getDefaultDirectoryPath()
 
 		idDir := idDir()
@@ -55,7 +56,7 @@ to quickly create a Cobra application.`,
 			fmt.Println(err)
 		}
 
-		s := bufio.NewScanner(fileId)
+		s := bufio.NewScanner(idFile)
 
 		var id string
 		for s.Scan() {
@@ -81,7 +82,7 @@ to quickly create a Cobra application.`,
 		defer idFile.Close()
 		csvWriter := OpenCSVWriter(file)
 
-		finalString := id + "," + description + ","
+		finalString := id + "," + args[0] + ","
 
 		currentTime := time.Now()
 
@@ -94,19 +95,17 @@ to quickly create a Cobra application.`,
 		}
 		err = csvWriter.Write(finalStringArr)
 		if err != nil {
-			fmt.Println("failed to write in csv file", err)
+			log.Fatal("failed to write in csv file", err)
 		}
 		fmt.Println("Written to file at", fileDirPath)
 		csvWriter.Flush()
 		if err := csvWriter.Error(); err != nil {
-			fmt.Println("failed to flush file", err)
+			log.Fatal("failed to flush file", err)
 		}
 
 		defer file.Close()
 	},
 }
-
-var description string
 
 func init() {
 	rootCmd.AddCommand(addCmd)
@@ -117,8 +116,8 @@ func init() {
 	// and all subcommands, e.g.:
 	// addCmd.PersistentFlags().StringVarP("description", "", "Allows you to specify what task you want to add")
 
-	addCmd.Flags().StringVarP(&description, "description", "d", "", "Allows you to specify what task you want to add")
-	addCmd.MarkFlagRequired("description")
+	// addCmd.Flags().StringVarP(&description, "description", "d", "", "Allows you to specify what task you want to add")
+	// addCmd.MarkFlagRequired("description")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:

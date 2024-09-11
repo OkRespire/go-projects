@@ -10,9 +10,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"time"
+	"text/tabwriter"
 
-	"github.com/mergestat/timediff"
 	"github.com/spf13/cobra"
 )
 
@@ -44,24 +43,11 @@ to quickly create a Cobra application.`,
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		count := 0
-		var tStr string
-		// TODO: MAKE SURE THE TIME IS READABLE!
+		w := tabwriter.NewWriter(os.Stdout, 20, 0, 2, ' ', 0)
 		for _, record := range records {
-			if count != 0 {
-				t, err := time.Parse("2006-01-02 15:04:05", record[2])
-				if err != nil {
-					log.Fatal(err)
-				}
-				tStr = timediff.TimeDiff(time.Now(), timediff.WithStartTime(t))
-
-				fmt.Println(record[0], record[1], tStr, record[3])
-			} else {
-				fmt.Println(record[0], record[1], record[2], record[3])
-				count++
-
-			}
+			s := record[0] + "\t" + record[1] + "\t" + record[2] + "\t" + record[3]
+			fmt.Fprintln(w, s)
+			w.Flush()
 		}
 	},
 }
@@ -76,7 +62,6 @@ func init() {
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
 	// listCmd.PersistentFlags().String("foo", "", "A help for foo")
-
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// listCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
