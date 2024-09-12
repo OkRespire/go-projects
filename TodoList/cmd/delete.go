@@ -33,26 +33,39 @@ to quickly create a Cobra application.`,
 
 		filePath := filepath.Join(dir, fileName)
 
-		file, err := os.OpenFile(filePath, os.O_RDWR, 0666)
+		fileRead, err := os.OpenFile(filePath, os.O_RDONLY, os.ModePerm)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		csvReader := csv.NewReader(file)
+		csvReader := csv.NewReader(fileRead)
 
 		fileContents, err := csvReader.ReadAll()
 		if err != nil {
 			log.Fatal(err)
 		}
 		fmt.Println(fileContents, id)
+		flag := false
+
+		defer fileRead.Close()
+
+		fileWrite, err := os.OpenFile(filePath, os.O_WRONLY|os.O_TRUNC, os.ModePerm)
+
+		csvWriter := csv.NewWriter(fileWrite)
 
 		// TODO: Make sure the record with the correct id is deleted and updated on the file.
 		for _, record := range fileContents {
 			if record[0] == id {
+				record[0], record[1], record[2], record[3] = "", "", "", ""
+				csvWriter.WriteAll(fileContents)
+				flag = true
 			}
 		}
+		if !flag {
+			fmt.Println("ID not found")
+		}
 
-		defer file.Close()
+		defer fileWrite.Close()
 	},
 }
 

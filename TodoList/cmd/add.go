@@ -86,7 +86,7 @@ to qickly create a Cobra application.`,
 
 		currentTime := time.Now()
 
-		finalString += currentTime.Format(time.DateTime) + "," + "FALSE"
+		finalString += currentTime.Format(time.DateTime) + "," + "false"
 
 		finalStringArr := strings.Split(finalString, ",")
 

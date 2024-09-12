@@ -44,6 +44,9 @@ to quickly create a Cobra application.`,
 		w := tabwriter.NewWriter(os.Stdout, 25, 0, 2, ' ', 0)
 		for _, record := range records {
 			var s string
+			if record[0] == "" {
+				continue
+			}
 			if all {
 				s = record[0] + "\t" + record[1] + "\t" + record[2] + "\t" + record[3]
 			} else {
