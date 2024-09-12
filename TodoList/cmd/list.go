@@ -27,8 +27,6 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("list called")
-
 		dir, fileName := getDefaultDirectoryPath()
 
 		filePath := filepath.Join(dir, fileName)
@@ -43,9 +41,15 @@ to quickly create a Cobra application.`,
 		if err != nil {
 			log.Fatal(err)
 		}
-		w := tabwriter.NewWriter(os.Stdout, 20, 0, 2, ' ', 0)
+		w := tabwriter.NewWriter(os.Stdout, 25, 0, 2, ' ', 0)
 		for _, record := range records {
-			s := record[0] + "\t" + record[1] + "\t" + record[2] + "\t" + record[3]
+			var s string
+			if all {
+				s = record[0] + "\t" + record[1] + "\t" + record[2] + "\t" + record[3]
+			} else {
+				s = record[0] + "\t" + record[1] + "\t" + record[2]
+			}
+
 			fmt.Fprintln(w, s)
 			w.Flush()
 		}
