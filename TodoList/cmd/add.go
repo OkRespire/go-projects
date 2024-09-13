@@ -22,17 +22,10 @@ import (
 var addCmd = &cobra.Command{
 	Args:  cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 	Use:   "add",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to qickly create a Cobra application.`,
+	Short: "Add a task to the To-Do List",
+	Long:  `Usage: <COMMAND> add "Thing To Do"`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("add called")
-
 		fmt.Println("description is: ", args[0])
 		dir, fileName := getDefaultDirectoryPath()
 
@@ -40,23 +33,17 @@ to qickly create a Cobra application.`,
 
 		fileDirPath := filepath.Join(dir, fileName)
 
-		file, err := os.OpenFile(fileDirPath, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+		file, err := os.OpenFile(fileDirPath, os.O_RDONLY, os.ModeAppend)
 		if err != nil {
 			fmt.Println("Error while opening the file")
 		}
 
-		// TODO: MAKE THE IDFILE AND FILEID INTO ONE SINGLE VARIABLE
 		fileId, err := os.OpenFile(filepath.Join(dir, idDir), os.O_RDONLY, 0444)
 		if err != nil {
 			fmt.Println(err)
 		}
 
-		idFile, err := os.OpenFile(filepath.Join(dir, idDir), os.O_RDWR, 0666)
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		s := bufio.NewScanner(idFile)
+		s := bufio.NewScanner(fileId)
 
 		var id string
 		for s.Scan() {
@@ -72,13 +59,18 @@ to qickly create a Cobra application.`,
 		fmt.Println(idInt)
 		id = strconv.Itoa(idInt)
 
+		defer fileId.Close()
+
+		idFile, err := os.OpenFile(filepath.Join(dir, idDir), os.O_WRONLY|os.O_TRUNC, 0666)
+		if err != nil {
+			log.Fatal(err)
+		}
 		f, err := idFile.Write([]byte(id))
 		if err != nil {
 			log.Fatal(err)
 		}
 		fmt.Printf("\n%d bytes written\n", f)
 
-		defer fileId.Close()
 		defer idFile.Close()
 		csvWriter := OpenCSVWriter(file)
 
@@ -109,19 +101,6 @@ to qickly create a Cobra application.`,
 
 func init() {
 	rootCmd.AddCommand(addCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// addCmd.PersistentFlags().StringVarP("description", "", "Allows you to specify what task you want to add")
-
-	// addCmd.Flags().StringVarP(&description, "description", "d", "", "Allows you to specify what task you want to add")
-	// addCmd.MarkFlagRequired("description")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// addCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 func OpenCSVWriter(file *os.File) *csv.Writer {

@@ -64,27 +64,5 @@ var all bool
 func init() {
 	rootCmd.AddCommand(listCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// listCmd.PersistentFlags().String("foo", "", "A help for foo")
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// listCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
-	listCmd.Flags().BoolVarP(&all, "all", "a", true, "Displays all the tasks completed or not")
+	listCmd.Flags().BoolVarP(&all, "all", "a", false, "Displays all the tasks completed or not")
 }
-
-// func printRecords(records [][]string) {
-//   if all {
-//     fmt.Println("All tasks")
-//   } else {
-//     fmt.Println("Incomplete tasks")
-//   }
-//   for _, record := range records {
-//     if !all {
-//
-//     }
-//   }
-// }
