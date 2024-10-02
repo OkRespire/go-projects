@@ -42,18 +42,18 @@ func init() {
 }
 
 func getDefaultDirectoryPath() (string, string) {
-	var dir string
 	var fileNamePath string
-
+	dir, err := os.UserConfigDir()
+	if err != nil {
+		log.Fatal(err)
+	}
 	switch DETECTED_OS {
+
 	case "windows":
-		dir = os.ExpandEnv("%APPDATA%\\Respire-ToDo\\")
 		fileNamePath = "\\list.csv"
 	case "linux":
-		dir = os.ExpandEnv("$HOME/.config/Respire-ToDo/")
 		fileNamePath = "/list.csv"
 	case "darwin":
-		dir = os.ExpandEnv("$HOME/.config/Respire-ToDo/")
 		fileNamePath = "/list.csv"
 	}
 
