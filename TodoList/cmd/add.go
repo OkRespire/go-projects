@@ -33,6 +33,8 @@ var addCmd = &cobra.Command{
 
 		fileDirPath := filepath.Join(dir, fileName)
 
+		fmt.Println(fileDirPath)
+
 		file, err := os.OpenFile(fileDirPath, os.O_RDONLY, os.ModeAppend)
 		if err != nil {
 			fmt.Println("Error while opening the file")
